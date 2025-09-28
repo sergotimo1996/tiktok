@@ -12,8 +12,32 @@
 
 	  gtag('config', 'G-T4PLFX2XB9');
 	</script>
+	<script>
+	  // Wire WhatsApp/Contact click to Meta Pixel
+	  document.addEventListener('DOMContentLoaded', function(){
+		var wa = document.getElementById('waBtn');
+		if (wa) wa.addEventListener('click', function(){ try{ if (typeof fbq === 'function') fbq('track','Contact'); }catch(e){} });
+	  });
+	</script>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Landing Page</title>
+
+	<!-- Meta Pixel Code -->
+	<script>
+	  !(function(f,b,e,v,n,t,s){
+		if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+		n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+		if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+		n.queue=[];t=b.createElement(e);t.async=!0;
+		t.src=v;s=b.getElementsByTagName(e)[0];
+		s.parentNode.insertBefore(t,s)
+	  })(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
+	  try{ fbq('init', '773358178999388'); fbq('track', 'PageView'); }catch(e){}
+	</script>
+	<noscript>
+	  <img height="1" width="1" style="display:none"
+	       src="https://www.facebook.com/tr?id=773358178999388&ev=PageView&noscript=1"/>
+	</noscript>
 	<style>
 		body {
 			min-height: 100vh;
@@ -1006,6 +1030,8 @@
 							// ignore errors — we'll redirect anyway
 							console.warn('no-cors fetch failed', err);
 						});
+						// fire Meta Pixel Lead event before redirect
+						try{ if (typeof fbq === 'function') fbq('track', 'Lead'); }catch(e){}
 						// immediately redirect locally — include lead id so thank-you page can read it
 						window.location.href = '/thank-you.html?lead=' + encodeURIComponent(leadId);
 						return;
@@ -1026,6 +1052,8 @@
 				}
 
 				// mark step 7 complete (visual)
+				// fire Meta Pixel Lead event before redirect
+				try{ if (typeof fbq === 'function') fbq('track', 'Lead'); }catch(e){}
 				// Redirect to thank-you page for better conversion tracking — include lead id
 				window.location.href = '/thank-you.html?lead=' + encodeURIComponent(leadId);
 			});

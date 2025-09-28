@@ -13,6 +13,22 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Thank you — application received</title>
   <meta name="robots" content="noindex,nofollow">
+  <!-- Meta Pixel Code -->
+  <script>
+    !(function(f,b,e,v,n,t,s){
+      if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)
+    })(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    try{ fbq('init', '773358178999388'); fbq('track', 'PageView'); }catch(e){}
+  </script>
+  <noscript>
+    <img height="1" width="1" style="display:none"
+         src="https://www.facebook.com/tr?id=773358178999388&ev=PageView&noscript=1"/>
+  </noscript>
   <style>
     :root{--bg:#0f0f10;--card:#171719;--muted:#b8b8b8;--accent:#ee1d52}
     *{box-sizing:border-box}
@@ -94,6 +110,17 @@
         if (notice) notice.textContent = 'Lead: ' + leadId;
       } else {
         window.dataLayer.push({ event: 'lead_thank_you' });
+      }
+    }catch(e){}
+
+    // Meta Pixel events: CompleteRegistration and Lead (if lead id present)
+    try{
+      var lid2 = (typeof leadId !== 'undefined') ? leadId : null;
+      if (typeof fbq === 'function'){
+        if (lid2) fbq('track', 'CompleteRegistration', { lead_id: lid2 });
+        else fbq('track', 'CompleteRegistration');
+        if (lid2) fbq('track', 'Lead', { lead_id: lid2 });
+        else fbq('track', 'Lead');
       }
     }catch(e){}
 
