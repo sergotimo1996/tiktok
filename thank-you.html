@@ -2,6 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-T4PLFX2XB9"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);} 
+    gtag('js', new Date());
+    gtag('config', 'G-T4PLFX2XB9');
+  </script>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Thank you — application received</title>
   <meta name="robots" content="noindex,nofollow">
@@ -70,8 +78,24 @@
     // Avoid form resubmission via Back
     if (history.replaceState) history.replaceState({}, document.title, location.pathname);
 
-    // Analytics event (GA4 / dataLayer)
-    try{ window.dataLayer = window.dataLayer || []; window.dataLayer.push({ event: 'lead_thank_you' }); }catch(e){}
+    // Analytics event (GA4 / dataLayer) — include lead id from URL if present
+    try{
+      window.dataLayer = window.dataLayer || [];
+      // helper to read query param
+      function getQueryParam(name){
+        var m = location.search.match(new RegExp('[?&]'+name+'=([^&]+)'));
+        return m ? decodeURIComponent(m[1]) : null;
+      }
+      var leadId = getQueryParam('lead');
+      if (leadId) {
+        window.dataLayer.push({ event: 'lead_thank_you', lead_id: leadId });
+        // show lead id near copy notice for convenience
+        var notice = document.getElementById('copyNotice');
+        if (notice) notice.textContent = 'Lead: ' + leadId;
+      } else {
+        window.dataLayer.push({ event: 'lead_thank_you' });
+      }
+    }catch(e){}
 
     // Copy link button
     document.getElementById('copyBtn').addEventListener('click', function(){
@@ -90,6 +114,22 @@
   // pause redirect if user interacts
   ['mousemove','keydown','touchstart'].forEach(function(ev){ window.addEventListener(ev,function(){ clearInterval(t); document.getElementById('countdown').textContent = 'Redirect paused — click "Home" when you are ready.'; }); });
     })();
+  </script>
+  <!-- GA4 lead event: fire a generate_lead event and attach lead_id if present -->
+  <script>
+    try {
+      var params = new URLSearchParams(location.search);
+      var lid = params.get('lead');
+      if (typeof gtag === 'function') {
+        if (lid) gtag('event', 'generate_lead', { lead_id: lid });
+        else gtag('event', 'generate_lead');
+      } else {
+        // fallback: push to dataLayer if gtag not available yet
+        window.dataLayer = window.dataLayer || [];
+        if (lid) window.dataLayer.push({ event: 'generate_lead', lead_id: lid });
+        else window.dataLayer.push({ event: 'generate_lead' });
+      }
+    } catch (e) { console.warn('gtag generate_lead failed', e); }
   </script>
 </body>
 </html>

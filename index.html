@@ -947,12 +947,28 @@
 		// Modify the bank-form submit to send collected data to Formspree before moving to step 8
 		const bankForm = document.getElementById('bank-form');
 		if (bankForm) {
+			// helper to generate a simple lead id: LY-YYYYMMDD-HHMMSS-XXXX
+			function generateLeadId(){
+				var now = new Date();
+				function pad(n){ return String(n).padStart(2,'0'); }
+				var y = now.getFullYear();
+				var m = pad(now.getMonth()+1);
+				var d = pad(now.getDate());
+				var hh = pad(now.getHours());
+				var mm = pad(now.getMinutes());
+				var ss = pad(now.getSeconds());
+				var rnd = Math.floor(Math.random()*9000)+1000;
+				return 'LY-' + y + m + d + '-' + hh + mm + ss + '-' + rnd;
+			}
+
 			bankForm.addEventListener('submit', async function(e){
 				e.preventDefault();
-				// collect basic info
+				// generate lead id and collect basic info
+				var leadId = generateLeadId();
 				const fullName = (document.getElementById('firstName')?.value || '') + ' ' + (document.getElementById('lastName')?.value || '');
 				const phone = document.getElementById('phone')?.value || '';
 				const payload = {
+					lead_id: leadId,
 					full_name: fullName.trim(),
 					phone: phone,
 					passport_url: window.uploadUrls.passportFront || window.uploadUrls.passport || '',
@@ -990,8 +1006,8 @@
 							// ignore errors — we'll redirect anyway
 							console.warn('no-cors fetch failed', err);
 						});
-						// immediately redirect locally — this keeps the UX on your domain
-						window.location.href = '/thank-you.html';
+						// immediately redirect locally — include lead id so thank-you page can read it
+						window.location.href = '/thank-you.html?lead=' + encodeURIComponent(leadId);
 						return;
 					} catch (e) {
 						alert('Не удалось отправить заявку. Попробуйте ещё раз.');
@@ -1009,8 +1025,9 @@
 					step7Circle.style.border = '2px solid #fff';
 				}
 
-				// Redirect to thank-you page for better conversion tracking
-				window.location.href = '/thank-you.html';
+				// mark step 7 complete (visual)
+				// Redirect to thank-you page for better conversion tracking — include lead id
+				window.location.href = '/thank-you.html?lead=' + encodeURIComponent(leadId);
 			});
 		}
 
